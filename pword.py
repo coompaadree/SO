@@ -55,49 +55,46 @@ def count_words(lines, word, mode):
 
 
 
-def prcs(filename, lines, word, mode):
+def prcs(lines, filename, word, mode):
     count = count_words(lines, word, mode)
     sys.stdout.write(f"Processo {current_process().name} - Ficheiro {filename} - Contagem: {count} \n")
 
 
+
+
 def split_file(filename, num_parts):
-    with open(filename, 'r', encoding='utf-8') as file:
+    with open(filename[0], 'r', encoding='utf-8') as file:
         lines = file.readlines()
     size = len(lines) // num_parts
-    return [lines[i*size:(i+1)*size] for i in range(num_parts)]
-
-
-
+    return [lines[i*size:(i+1)*size] for i in range(num_parts - 1)] + [lines[(num_parts-1)*size:]]
 
 
 
 def distribute_tasks(files, word, mode, num_processes):
     processes = []
     
-    if len(files) == 1:
-        # Caso apenas um ficheiro seja passado, divida-o em partes para os processos
-        filename = files[0]
+    if len(files) == 1:  # Caso de apenas um arquivo
+        filename = files
         file_parts = split_file(filename, num_processes)
         for i, lines in enumerate(file_parts):
-            process = Process(target=prcs, args=(filename, lines, word, mode,), name=i+1)
+            process = Process(target=prcs, args=(lines, filename, word, mode), name=i+1)
             processes.append(process)
             process.start()
-    else:
-        # Caso múltiplos ficheiros sejam passados, distribua os ficheiros entre os processos
-        for i, filename in enumerate(files):
-            with open(filename, 'r', encoding='utf-8') as file:
-                lines = file.readlines()
-            process = Process(target=prcs, args=(filename, lines, word, mode), name=i+1)
+
+    else:  # Caso de múltiplos arquivos
+        file_groups = [files[i::num_processes] for i in range(num_processes)]
+        for i, file_group in enumerate(file_groups):
+            lines = []
+            for filename in file_group:
+                with open(filename, 'r', encoding='utf-8') as file:
+                    lines.extend(file.readlines())
+            process = Process(target=prcs, args=(lines, ', '.join(file_group), word, mode), name=i+1)
             processes.append(process)
             process.start()
-            if len(processes) >= num_processes:
-                for p in processes:
-                    p.join()
-                processes = []
-    
-    # Espera que todos os processos terminem
+
     for p in processes:
         p.join()
+
 
 
 
@@ -118,7 +115,7 @@ def main(args):
     #     return
     
     # Ajusta o número de processos se necessário
-    if len(files) < num_processes:
+    if len(files) < num_processes and len(files)!=1:
         num_processes = len(files)
 
     distribute_tasks(files, word, mode, num_processes)
