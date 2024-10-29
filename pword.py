@@ -1,20 +1,7 @@
-### Grupo: SO-TI-XX
-### Aluno 1: Nome Apelido (fcXXXX)
-### Aluno 2: Nome Apelido (fcXXXX)
-### Aluno 3: Nome Apelido (fcXXXX)
-
-# import sys
-
-# #TO-DO: Implementar o pword
-
-# def main(args):
-#     print('Programa: pword.py')
-#     print('Argumentos: ',args)
-
-# if __name__ == "__main__":
-#     main(sys.argv[1:])
-
-
+### Grupo: SO-TI-02
+### Aluno 1: André Alexandre (fc62224)
+### Aluno 2: Sofian Fathallah (fc62814)
+### Aluno 3: Tair Injai (fc62848)
 
 
 
@@ -23,6 +10,8 @@ import sys
 import os
 from multiprocessing import Process, current_process
 
+
+
 def parse_arguments(arg):
     parser = argparse.ArgumentParser(description="Parallel word search and count")
     parser.add_argument("-m", choices=["c", "l", "i"], default="c", help="Modo de contagem: c (total), l (linhas), i (isolado)")
@@ -30,9 +19,6 @@ def parse_arguments(arg):
     parser.add_argument("-w", required=True, help="Palavra a ser pesquisada")
     parser.add_argument("files", nargs="+", help="Lista de ficheiros")
     return parser.parse_args(arg)
-
-
-
 
 
 
@@ -54,11 +40,9 @@ def count_words(lines, word, mode):
 
 
 
-
 def prcs(lines, filename, word, mode):
     count = count_words(lines, word, mode)
     sys.stdout.write(f"Processo {current_process().name} - Ficheiro {filename} - Contagem: {count} \n")
-
 
 
 
@@ -70,7 +54,7 @@ def split_file(filename, num_parts):
 
 
 
-def distribute_tasks(files, word, mode, num_processes):
+def distribute(files, word, mode, num_processes):
     processes = []
     
     if len(files) == 1:  # Caso de apenas um arquivo
@@ -97,8 +81,6 @@ def distribute_tasks(files, word, mode, num_processes):
 
 
 
-
-
 def main(args):
     args = parse_arguments(args)
     files = args.files
@@ -109,16 +91,11 @@ def main(args):
     print('Programa: pword.py')
     print('Argumentos: ', args, "\n")
     
-    # Verifica se há ficheiros para processar
-    # if not files:
-    #     print("Erro: Nenhum ficheiro especificado.")
-    #     return
-    
     # Ajusta o número de processos se necessário
     if len(files) < num_processes and len(files)!=1:
         num_processes = len(files)
 
-    distribute_tasks(files, word, mode, num_processes)
+    distribute(files, word, mode, num_processes)
 
 
 
